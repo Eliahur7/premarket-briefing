@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pre-Market Brief</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    background: #0a0e1a;
+    color: #c8d6ef;
+    padding: 20px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .container { max-width: 680px; margin: 0 auto; }
+  .header {
+    border-bottom: 1px solid #1e3a5f;
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+  }
+  .header h1 {
+    font-size: 22px;
+    color: #4fc3f7;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .header .date { color: #6b8cae; margin-top: 4px; font-size: 12px; }
+  .section { margin-bottom: 28px; }
+  .section-title {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #4fc3f7;
+    border-bottom: 1px solid #1e3a5f;
+    padding-bottom: 6px;
+    margin-bottom: 12px;
+  }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .futures-item {
+    background: #0f1729;
+    border: 1px solid #1e3a5f;
+    border-radius: 4px;
+    padding: 8px 12px;
+  }
+  .futures-label { color: #6b8cae; font-size: 11px; }
+  .futures-value { color: #e2eaf7; font-weight: 600; font-size: 14px; margin-top: 2px; }
+  .futures-value.up { color: #4caf80; }
+  .futures-value.down { color: #ef5350; }
+  .ticker-row {
+    display: flex;
+    align-items: baseline;
+    padding: 7px 0;
+    border-bottom: 1px solid #0f1729;
+    gap: 10px;
+  }
+  .ticker-row:last-child { border-bottom: none; }
+  .ticker-symbol { color: #e2eaf7; font-weight: 700; min-width: 60px; }
+  .ticker-pct { min-width: 60px; font-weight: 600; }
+  .ticker-pct.up { color: #4caf80; }
+  .ticker-pct.down { color: #ef5350; }
+  .ticker-pct.flat { color: #6b8cae; }
+  .ticker-note { color: #6b8cae; font-size: 12px; flex: 1; }
+  .headline-item { padding: 5px 0; border-bottom: 1px solid #0f1729; }
+  .headline-item:last-child { border-bottom: none; }
+  .headline-title { color: #c8d6ef; font-size: 12px; }
+  .headline-meta { color: #3d5a73; font-size: 11px; margin-top: 2px; }
+  .headline-tickers { color: #4fc3f7; }
+  .thesis-box {
+    background: #0f1729;
+    border: 1px solid #1e3a5f;
+    border-left: 3px solid #4fc3f7;
+    border-radius: 4px;
+    padding: 16px;
+    white-space: pre-wrap;
+    color: #c8d6ef;
+    line-height: 1.8;
+  }
+  .sentiment-pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .sentiment-pill.Bullish, .sentiment-pill.MildlyBullish { background: #1a3a2a; color: #4caf80; }
+  .sentiment-pill.Bearish, .sentiment-pill.MildlyBearish { background: #3a1a1a; color: #ef5350; }
+  .sentiment-pill.Neutral { background: #1a2a3a; color: #6b8cae; }
+  .sector-row { display: flex; justify-content: space-between; padding: 4px 0; }
+  .sector-symbol { color: #e2eaf7; }
+  .sector-pct.up { color: #4caf80; }
+  .sector-pct.down { color: #ef5350; }
+  .footer {
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 1px solid #1e3a5f;
+    color: #3d5a73;
+    font-size: 11px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>📈 PRE-MARKET BRIEF</h1>
+    <div class="date">{{ date }} &nbsp;|&nbsp; 7:30 AM CT</div>
+  </div>
+
+  <!-- Macro Futures -->
+  <div class="section">
+    <div class="section-title">Macro Pulse</div>
+    <div class="grid-2">
+      {% for label, value in futures.items() %}
+      <div class="futures-item">
+        <div class="futures-label">{{ label }}</div>
+        <div class="futures-value {{ 'up' if '▲' in value else 'down' }}">{{ value }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Sector Leaders / Laggards -->
+  {% if sectors %}
+  <div class="section">
+    <div class="section-title">Sector Rotation</div>
+    <div class="grid-2">
+      <div>
+        <div style="color:#4caf80; font-size:11px; margin-bottom:6px;">▲ LEADERS</div>
+        {% for s in sectors.leaders %}
+        <div class="sector-row">
+          <span class="sector-symbol">{{ s.symbol }}</span>
+          <span class="sector-pct up">{{ '+%.1f%%' % s.change_pct }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      <div>
+        <div style="color:#ef5350; font-size:11px; margin-bottom:6px;">▼ LAGGARDS</div>
+        {% for s in sectors.laggards %}
+        <div class="sector-row">
+          <span class="sector-symbol">{{ s.symbol }}</span>
+          <span class="sector-pct down">{{ '%.1f%%' % s.change_pct }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Watchlist -->
+  <div class="section">
+    <div class="section-title">
+      Watchlist Radar
+      &nbsp;
+      <span class="sentiment-pill {{ sentiment.label | replace(' ', '') }}">
+        {{ sentiment.label }}
+      </span>
+    </div>
+    {% for item in watchlist %}
+    <div class="ticker-row">
+      <span>{{ item.emoji }}</span>
+      <span class="ticker-symbol">{{ item.symbol }}</span>
+      <span class="ticker-pct {{ 'up' if item.change_pct >= 0.5 else ('down' if item.change_pct <= -0.5 else 'flat') }}">
+        {{ '+%.1f%%' % item.change_pct if item.change_pct >= 0 else '%.1f%%' % item.change_pct }}
+      </span>
+      <span class="ticker-note">{{ item.note }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Top Headlines -->
+  {% if news %}
+  <div class="section">
+    <div class="section-title">Top Headlines</div>
+    {% for item in news[:8] %}
+    <div class="headline-item">
+      <div class="headline-title">{{ item.title }}</div>
+      <div class="headline-meta">
+        {% if item.tickers %}
+        <span class="headline-tickers">{{ item.tickers | join(' · ') }}</span> &nbsp;·&nbsp;
+        {% endif %}
+        {{ item.source }}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- AI Thesis -->
+  <div class="section">
+    <div class="section-title">AI Trade Thesis</div>
+    <div class="thesis-box">{{ thesis or 'Thesis generation pending...' }}</div>
+  </div>
+
+  <div class="footer">
+    Pre-Market Briefing Bot &nbsp;·&nbsp; Powered by Claude + yfinance + AWS
+    <br>Not financial advice. Trade your own plan.
+  </div>
+
+</div>
+</body>
+</html>
