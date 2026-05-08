@@ -98,11 +98,11 @@ def _print_brief(brief: dict) -> None:
         print(f"  {k}: {v}")
 
     print("\nWATCHLIST RADAR")
-    for ticker, data in brief.get("watchlist", {}).items():
-        sig = brief.get("signals", {}).get(ticker, {})
-        emoji = "🟢" if sig.get("bias") == "bullish" else ("🔴" if sig.get("bias") == "bearish" else "🟡")
-        pct = data.get("premarket_change_pct", 0)
-        note = sig.get("note", "")
+    for item in brief.get("watchlist", []):
+        ticker = item["symbol"]
+        emoji = item["emoji"]
+        pct = item["change_pct"]
+        note = item["note"]
         print(f"  {emoji} {ticker:<6} {pct:+.1f}%  |  {note}")
 
     print("\nMARKET SENTIMENT")

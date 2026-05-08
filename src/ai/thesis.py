@@ -69,9 +69,11 @@ def _build_prompt(brief: dict) -> str:
     leaders = sectors.get("leaders", [])
     laggards = sectors.get("laggards", [])
     if leaders:
-        lines.append(f"\nTOP SECTORS: {', '.join(f\"{s['symbol']} {s['change_pct']:+.1f}%\" for s in leaders)}")
+        leaders_str = ', '.join(f"{s['symbol']} {s['change_pct']:+.1f}%" for s in leaders)
+        lines.append(f"\nTOP SECTORS: {leaders_str}")
     if laggards:
-        lines.append(f"WEAK SECTORS: {', '.join(f\"{s['symbol']} {s['change_pct']:+.1f}%\" for s in laggards)}")
+        laggards_str = ', '.join(f"{s['symbol']} {s['change_pct']:+.1f}%" for s in laggards)
+        lines.append(f"WEAK SECTORS: {laggards_str}")
 
     # Sentiment
     sentiment = brief.get("sentiment", {})
