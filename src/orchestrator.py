@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from src.collectors.futures import fetch_futures
+from src.collectors.movers import fetch_movers
 from src.collectors.news import fetch_news
 from src.collectors.watchlist import fetch_watchlist
 from src.analyzers.sentiment import analyze_sentiment
@@ -47,6 +48,7 @@ def run(dry_run: bool = False) -> dict:
     # ── 1. Collect ────────────────────────────────────────────────────────────
     log.info("Step 1/5: Collecting market data...")
     futures_data = fetch_futures()
+    movers_data = fetch_movers()
     watchlist_data = fetch_watchlist(watchlist)
     news_items = fetch_news(watchlist)
 
@@ -60,6 +62,7 @@ def run(dry_run: bool = False) -> dict:
     brief = assemble_brief(
         date=today,
         futures=futures_data,
+        movers=movers_data,
         watchlist=watchlist_data,
         signals=signals,
         news=news_items,
@@ -96,6 +99,25 @@ def _print_brief(brief: dict) -> None:
     print("\nMACRO PULSE")
     for k, v in brief.get("futures", {}).items():
         print(f"  {k}: {v}")
+
+    print("\nTOP 10 PRE-MARKET MOVERS")
+    movers = brief.get("movers", {})
+    
+    if movers.get("gainers"):
+        print("  Gainers:")
+        for item in movers["gainers"][:5]:  # Top 5 gainers
+            symbol = item["symbol"]
+            change_pct = item["change_pct"]
+            price = item["price"]
+            print(f"    🟢 {symbol:<6} {change_pct:+.2f}%  ${price:.2f}")
+    
+    if movers.get("losers"):
+        print("  Losers:")
+        for item in movers["losers"][:5]:  # Top 5 losers
+            symbol = item["symbol"]
+            change_pct = item["change_pct"]
+            price = item["price"]
+            print(f"    🔴 {symbol:<6} {change_pct:+.2f}%  ${price:.2f}")
 
     print("\nWATCHLIST RADAR")
     for item in brief.get("watchlist", []):

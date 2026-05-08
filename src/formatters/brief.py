@@ -14,6 +14,7 @@ log = logging.getLogger(__name__)
 def assemble_brief(
     date: str,
     futures: dict,
+    movers: dict,
     watchlist: dict,
     signals: dict,
     news: list,
@@ -28,13 +29,14 @@ def assemble_brief(
         "date": date,
         "futures": _format_futures(futures),
         "sectors": _format_sectors(futures),
+        "movers": _format_movers(movers),
         "watchlist": _format_watchlist(watchlist, signals),
         "news": _format_news(news),
         "sentiment": sentiment,
         "thesis": None,  # filled in by orchestrator after AI call
     }
 
-    log.info(f"Brief assembled: {len(brief['watchlist'])} tickers, {len(brief['news'])} headlines")
+    log.info(f"Brief assembled: {len(brief['watchlist'])} tickers, {len(brief['movers']['gainers'])} gainers, {len(brief['news'])} headlines")
     return brief
 
 
@@ -63,6 +65,14 @@ def _format_sectors(futures: dict) -> dict:
             {"symbol": s, "change_pct": d.get("change_pct", 0)}
             for s, d in bottom
         ],
+    }
+
+
+def _format_movers(movers: dict) -> dict:
+    """Format top 10 gainers and losers."""
+    return {
+        "gainers": movers.get("gainers", []),
+        "losers": movers.get("losers", []),
     }
 
 
