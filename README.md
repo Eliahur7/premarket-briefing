@@ -8,8 +8,13 @@ An autonomous AI-powered agent that delivers a personalized pre-market intellige
 
 ## What It Does
 
-Every weekday at **7:30 AM CT**, this bot:
+### Two Modes:
 
+**📊 Interactive Dashboard (Streamlit)**
+Real-time market data visualization with live futures, premarket movers, and technical analysis. Perfect for monitoring the market in real-time throughout the morning.
+
+**📧 Scheduled Briefing (Lambda Pipeline)**
+Every weekday at **7:30 AM CT**, this bot:
 1. **Fetches overnight data** — futures, sector ETF pre-market moves, VIX
 2. **Scans your watchlist** — checks each ticker for momentum signals, gap conditions, and news
 3. **Summarizes market news** — pulls top financial headlines and runs sentiment analysis
@@ -44,6 +49,15 @@ AI TRADE THESIS
 
 ## Architecture
 
+### Streamlit Dashboard
+```
+app.py (Streamlit)
+    │
+    ├──▶ yfinance → Real-time futures & movers
+    └──▶ Plotly → Interactive charts & metrics
+```
+
+### Scheduled Pipeline
 ```
 EventBridge (cron)
       │
@@ -75,7 +89,7 @@ Lambda: orchestrator.py
 ```bash
 git clone https://github.com/YOUR_USERNAME/premarket-briefing.git
 cd premarket-briefing
-python -m venv .venv && source .venv/bin/activate
+python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -86,7 +100,15 @@ cp .env.example .env
 # Fill in your keys — see Configuration section below
 ```
 
-### 3. Run locally
+### 3a. Run the Streamlit Dashboard
+
+```bash
+streamlit run app.py
+```
+
+Visit `http://localhost:8501` to see live market data with futures, movers, and technical analysis.
+
+### 3b. Run the Scheduled Pipeline Locally
 
 ```bash
 python -m src.orchestrator --dry-run
@@ -124,6 +146,7 @@ Copy `.env.example` to `.env` and fill in:
 
 ```
 premarket-briefing/
+├── app.py                       # Streamlit interactive dashboard
 ├── src/
 │   ├── orchestrator.py          # Lambda handler + local entrypoint
 │   ├── collectors/
