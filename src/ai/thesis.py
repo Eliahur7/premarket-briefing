@@ -28,30 +28,16 @@ Keep the full response under 350 words."""
 
 def generate_thesis(brief: dict[str, Any]) -> str:
     """
-    Generate an AI trade thesis from the assembled brief.
-    Returns a plain-text thesis string.
+    Generate an AI trade thesis from the assembled brief using the Multi-Agent Trading Desk.
+    Returns a plain-text trade thesis string.
     """
-    api_key = os.getenv("ANTHROPIC_API_KEY")
-    if not api_key:
-        log.warning("ANTHROPIC_API_KEY not set — skipping AI thesis")
-        return "AI thesis unavailable — set ANTHROPIC_API_KEY to enable."
-
-    prompt = _build_prompt(brief)
-
     try:
-        client = anthropic.Anthropic(api_key=api_key)
-        message = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=600,
-            system=SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        thesis = message.content[0].text.strip()
-        log.info(f"AI thesis generated ({len(thesis)} chars)")
-        return thesis
-
+        from src.ai.agents import ChiefTradingDesk
+        desk = ChiefTradingDesk()
+        plan = desk.generate_trading_plan(brief)
+        return plan.get("trade_thesis", "Thesis generation completed.")
     except Exception as e:
-        log.error(f"Anthropic API call failed: {e}")
+        log.error(f"Multi-agent thesis generation failed: {e}")
         return f"AI thesis generation failed: {e}"
 
 
